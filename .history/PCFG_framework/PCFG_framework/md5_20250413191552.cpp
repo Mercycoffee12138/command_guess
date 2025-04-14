@@ -228,10 +228,10 @@ void MD5Hash_SIMD(const string inputs[4], bit32 states[4][4]) {
     Byte* paddedMessages[4];
     int messageLengths[4];
     
-	paddedMessages[0] = StringProcess(inputs[0], &messageLengths[0]);
-	paddedMessages[1] = StringProcess(inputs[1], &messageLengths[1]);
-	paddedMessages[2] = StringProcess(inputs[2], &messageLengths[2]);
-	paddedMessages[3] = StringProcess(inputs[3], &messageLengths[3]);
+    // 使用StringProcess处理每个输入
+    for (int i = 0; i < 4; i++) {
+        paddedMessages[i] = StringProcess(inputs[i], &messageLengths[i]);
+    }
     
     // 确认所有消息块的数量相同
     int n_blocks = messageLengths[0] / 64;
