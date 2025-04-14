@@ -12,8 +12,6 @@ typedef unsigned int bit32;
 
 typedef uint32x4_t bit32x4_t;  // 4个32位整数的向量
 
-#define MAX_BUFFER_SIZE 65536
-
 // MD5的一系列参数。参数是固定的，其实你不需要看懂这些
 #define s11 7
 #define s12 12
@@ -48,11 +46,22 @@ typedef uint32x4_t bit32x4_t;  // 4个32位整数的向量
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
-// 将内联函数改为宏定义
-#define F_SIMD(x, y, z) (vorrq_u32(vandq_u32((x), (y)), vandq_u32(vmvnq_u32((x)), (z))))
-#define G_SIMD(x, y, z) (vorrq_u32(vandq_u32((x), (z)), vandq_u32((y), vmvnq_u32((z)))))
-#define H_SIMD(x, y, z) (veorq_u32(veorq_u32((x), (y)), (z)))
-#define I_SIMD(x, y, z) (veorq_u32((y), vorrq_u32((x), vmvnq_u32((z)))))
+// 添加SIMD版本的基本函数
+inline bit32x4_t F_SIMD(bit32x4_t x, bit32x4_t y, bit32x4_t z) {
+  return vorrq_u32(vandq_u32(x, y), vandq_u32(vmvnq_u32(x), z));
+}
+
+inline bit32x4_t G_SIMD(bit32x4_t x, bit32x4_t y, bit32x4_t z) {
+  return vorrq_u32(vandq_u32(x, z), vandq_u32(y, vmvnq_u32(z)));
+}
+
+inline bit32x4_t H_SIMD(bit32x4_t x, bit32x4_t y, bit32x4_t z) {
+  return veorq_u32(veorq_u32(x, y), z);
+}
+
+inline bit32x4_t I_SIMD(bit32x4_t x, bit32x4_t y, bit32x4_t z) {
+  return veorq_u32(y, vorrq_u32(x, vmvnq_u32(z)));
+}
 
 /**
  * @Rotate Left.
@@ -69,8 +78,12 @@ typedef uint32x4_t bit32x4_t;  // 4个32位整数的向量
 #define ROTATELEFT(num, n) (((num) << (n)) | ((num) >> (32-(n))))
 
 // NEON version of ROTATELEFT
-#define ROTATELEFT_SIMD(num, n) (vorrq_u32(vshlq_n_u32((num), (n)), vshrq_n_u32((num), 32 - (n))))
+#define neon_ROTATELEFT(num, n) (vorrq_u32(vshlq_n_u32((num), (n)), vshrq_n_u32((num), 32 - (n))))
 
+// ROTATELEFT的SIMD版本
+inline bit32x4_t ROTATELEFT_SIMD(bit32x4_t x, int n) {
+  return vorrq_u32(vshlq_n_u32(x, n), vshrq_n_u32(x, 32 - n));
+}
 
 #define FF(a, b, c, d, x, s, ac) { \
   (a) += F ((b), (c), (d)) + (x) + ac; \
@@ -121,7 +134,3 @@ typedef uint32x4_t bit32x4_t;  // 4个32位整数的向量
 
 void MD5Hash(string input, bit32 *state);
 void MD5Hash_SIMD(const string inputs[4], bit32 states[4][4]);
-
-static Byte zero_buffer[MAX_BUFFER_SIZE] = {0};
-static const size_t BLOCK_OFFSETS[16] = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60};
-static bit32x4_t M_static[16] __attribute__((aligned(16)));
