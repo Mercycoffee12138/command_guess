@@ -30,6 +30,7 @@ int main()
     auto start = system_clock::now();
     // 由于需要定期清空内存，我们在这里记录已生成的猜测总数
     int history = 0;
+    cout<<"111"<<endl;
     // std::ofstream a("./output/results.txt");
     while (!q.priority.empty())
     {
@@ -58,7 +59,7 @@ int main()
         // 然后，q.guesses将会被清空。为了有效记录已经生成的口令总数，维护一个history变量来进行记录
         if (curr_num > 1000000)
         {
-           /* auto start_hash = system_clock::now();
+            /*auto start_hash = system_clock::now();
             bit32 state[4];
             for (string pw : q.guesses)
             {
@@ -78,36 +79,23 @@ int main()
             // 创建临时变量用于批处理
             string inputs[4];
             bit32 states[4][4];
-            
-             // 计算需要处理的完整批次
-            size_t complete_batches = q.guesses.size() / 4;
-
+    
             // 直接以4个一组方式处理密码
             auto it = q.guesses.begin();
-            // 每次处理4个密码
-            for (size_t batch = 0; batch < complete_batches; batch++)
+            for (size_t i = 0; i < q.guesses.size(); i += 4)
             {
-                // 准备4个输入密码
-                for (int i = 0; i < 4; i++) {
-                    inputs[i] = *it++;
+                // 一次性获取4个密码
+                for (int j = 0; j < 4; j++) {
+                    inputs[j] = *(it++);
                 }
         
                 // 调用SIMD版本的MD5哈希函数处理4个密码
                 MD5Hash_SIMD(inputs, states);
         
-                // 如果需要处理哈希结果，可以在这里添加代码
-                // 例如输出或存储哈希值
-        /*
-        for (int i = 0; i < 4; i++) {
-            cout << "Password: " << inputs[i] << ", Hash: ";
-            for (int j = 0; j < 4; j++) {
-                cout << std::setw(8) << std::setfill('0') << hex << states[i][j];
+                // 这里可以处理哈希结果
+                // 如果需要输出或存储哈希结果，可以在这里添加代码
             }
-            cout << endl;
-        }*/
-        
-            }
-                
+
             // 在这里对哈希所需的总时长进行计算
             auto end_hash = system_clock::now();
             auto duration = duration_cast<microseconds>(end_hash - start_hash);
@@ -119,6 +107,4 @@ int main()
             q.guesses.clear();
         }
     }
-    CleanupMD5Resources();
-    return 0;
 }
