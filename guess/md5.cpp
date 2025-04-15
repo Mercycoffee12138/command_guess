@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <assert.h>
 #include <chrono>
+#include <algorithm>
 
 using namespace std;
 using namespace chrono;
@@ -27,7 +28,7 @@ Byte *StringProcess(string input, int *n_byte)
 	int paddingBits = bitLength % 512;
 	if (paddingBits > 448)
 	{
-		paddingBits += 512 - (paddingBits - 448);
+		paddingBits = 512 - (paddingBits - 448);
 	}
 	else if (paddingBits < 448)
 	{
@@ -263,11 +264,8 @@ void MD5Hash_SIMD(const string inputs[4], bit32 states[4][4]) {
     int messageLengths[4];
     
 	// 找出最长的输入
-    size_t max_length = 0;
-    for (int i = 0; i < 4; i++) {
-        if (inputs[i].length() > max_length) 
-            max_length = inputs[i].length();
-    }
+    size_t max_length = std::max({inputs[0].length(), inputs[1].length(), 
+		inputs[2].length(), inputs[3].length()});
     
     // 计算所需的最大缓冲区大小
     size_t padded_size = ((max_length + 64 + 8 + 63) / 64) * 64; // 确保64字节对齐
